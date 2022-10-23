@@ -20,6 +20,8 @@ y = dataset[:, 5]
 #train-test-split
 X_train,X_test,y_train,y_test = train_test_split(X,y,test_size = 0.30,random_state = 101)
 
+
+
 model1 = Sequential()
 model1.add(Dense(50,activation = 'relu',input_dim = 5))
 model1.add(Dense(25,activation = 'relu'))
@@ -37,19 +39,19 @@ def precision_m(y_true, y_pred):
     precision = true_positives / (predicted_positives + K.epsilon())
     return precision
 
-def accuracy_m(y_true, y_pred):
+def f1_m(y_true, y_pred):
     precision = precision_m(y_true, y_pred)
     recall = recall_m(y_true, y_pred)
     return 2*((precision*recall)/(precision+recall+K.epsilon()))
 
-model1.compile(loss='binary_crossentropy', optimizer='adam', metrics=[accuracy_m])
+model1.compile(loss='binary_crossentropy', optimizer='adam', metrics=[f1_m])
 history = model1.fit(X_train,y_train,validation_data = (X_test,y_test),epochs = 100)
 
 plt.plot(history.history['loss'])
-plt.plot(history.history['accuracy_m'])
+plt.plot(history.history['f1_m'])
 plt.plot(history.history['val_loss'])
-plt.plot(history.history['val_accuracy_m'])
-plt.legend(['loss','accuracy_m',"val_loss",'val_accuracy_m'])
+plt.plot(history.history['val_f1_m'])
+plt.legend(['loss','f1_m',"val_loss",'val_f1_m'])
 plt.show()
 
 model1.save('model1.h5')
@@ -60,14 +62,14 @@ model2.add(Dense(25,activation = 'relu'))
 model2.add(Dense(10,activation = 'relu'))
 model2.add(Dense(1,activation = 'sigmoid'))
 
-model2.compile(loss='binary_crossentropy', optimizer='adam', metrics=[accuracy_m])
+model2.compile(loss='binary_crossentropy', optimizer='adam', metrics=[f1_m])
 history1 = model2.fit(X_train,y_train,validation_data = (X_test,y_test),epochs = 100)
 
 plt.plot(history1.history['loss'])
-plt.plot(history1.history['accuracy_m'])
+plt.plot(history1.history['f1_m'])
 plt.plot(history1.history['val_loss'])
-plt.plot(history1.history['val_accuracy_m'])
-plt.legend(['loss','accuracy_m',"val_loss",'val_accuracy_m'])
+plt.plot(history1.history['val_f1_m'])
+plt.legend(['loss','f1_m',"val_loss",'val_f1_m'])
 plt.show()
 
 model2.save('model2.h5')
@@ -80,15 +82,16 @@ model3.add(Dropout(0.1))
 model3.add(Dense(10,activation = 'relu'))
 model3.add(Dense(1,activation = 'sigmoid'))
 
-model3.compile(loss='binary_crossentropy', optimizer='adam', metrics=[accuracy_m])
+model3.compile(loss='binary_crossentropy', optimizer='adam', metrics=[f1_m])
 history3 = model3.fit(X_train,y_train,validation_data = (X_test,y_test),epochs = 100)
 
 plt.plot(history3.history['loss'])
-plt.plot(history3.history['accuracy_m'])
+plt.plot(history3.history['f1_m'])
 plt.plot(history3.history['val_loss'])
-plt.plot(history3.history['val_accuracy_m'])
-plt.legend(['loss','accuracy_m',"val_loss",'val_accuracy_m'])
+plt.plot(history3.history['val_f1_m'])
+plt.legend(['loss','f1_m',"val_loss",'val_f1_m'])
 plt.show()
+
 
 model3.save('model3.h5')
 
@@ -99,20 +102,20 @@ model4.add(Dropout(0.1))
 model4.add(Dense(10,activation = 'relu'))
 model4.add(Dense(1,activation = 'sigmoid'))
 
-model4.compile(loss='binary_crossentropy', optimizer='adam', metrics=[accuracy_m])
+model4.compile(loss='binary_crossentropy', optimizer='adam', metrics=[f1_m])
 history4 = model4.fit(X_train,y_train,validation_data = (X_test,y_test),epochs = 100)
 
 plt.plot(history4.history['loss'])
-plt.plot(history4.history['accuracy_m'])
+plt.plot(history4.history['f1_m'])
 plt.plot(history4.history['val_loss'])
-plt.plot(history4.history['val_accuracy_m'])
-plt.legend(['loss','accuracy_m',"val_loss",'val_accuracy_m'])
+plt.plot(history4.history['val_f1_m'])
+plt.legend(['loss','f1_m',"val_loss",'val_f1_m'])
 plt.show()
 
 model4.save('model4.h5')
 
 dependencies = {
-    'accuracy_m': accuracy_m
+    'f1_m': f1_m
 }
 
 # load models from file
@@ -168,17 +171,17 @@ def stacked_prediction(members, model, inputX):
 
 # evaluate model on test set
 yhat = stacked_prediction(members, model, X_test)
-score = accuracy_m(y_test/1.0, yhat/1.0)
+score = f1_m(y_test/1.0, yhat/1.0)
 print('Stacked F Score:', score)
 
-from sklearn.metrics import accuracy_score
+from sklearn.metrics import f1_score
 
 i = 0
 for model in members:
     i+=1
     pred = model.predict(X_test)
-    score = accuracy_score(y_test,pred.round())
-    print('Accuracy of model {} is '.format(i),score)
+    score = f1_score(y_test,pred.round())
+    print('F-Score of model {} is '.format(i),score)
 
 
 
